@@ -1,0 +1,41 @@
+{
+    "config" : {
+        "name" : "test adventure",
+        "description" : "example description",
+        "creator" : "Robo#4196",
+        "plays" : 0,
+        "imageurl" : "https://cdn.discordapp.com/avatars/416358583220043796/8f702ebf579bce2d7a6f0a4419ac5faf.png?size=1024"
+    },
+    "segments" : {
+        "0" : {
+            "maintext" : "Your journey starts here",
+            "choicetext" : "what should you do?",
+            "choices" : [
+                {
+                    "emote" : "🔫",
+                    "text" : "take aim",
+                    "target" : "1"
+                },
+                {
+                    "emote" : "🐱",
+                    "text" : "throw a cat",
+                    "target" : "0"
+                }
+            ]
+        },
+        "1" : {
+            "maintext" : "segment 1",
+            "choicetext" : "where do you want to go?",
+            "choices" : [
+                {
+                    "emote" : ":emote1:",
+                    "target" : "2"
+                },
+                {
+                    "emote" : ":emote2:",
+                    "target" : "0"
+                }
+            ]
+        }
+    }
+}

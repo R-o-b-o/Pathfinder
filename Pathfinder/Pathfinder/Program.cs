@@ -30,9 +30,11 @@ namespace Pathfinder
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("token"));
             await client.StartAsync();
 
+            await client.SetGameAsync("p!help");
             // Here we initialize the logic required to register our commands.
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
+            Console.WriteLine("bot started");
             await Task.Delay(-1);
         }
 
