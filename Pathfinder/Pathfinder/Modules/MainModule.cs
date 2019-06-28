@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 using Discord;
 using Discord.Commands;
 using Pathfinder.Services;
@@ -27,33 +26,18 @@ namespace Pathfinder.Modules
         [Command("adventures")]
         public async Task AdventuresAsync()
         {
-            string[] dirs = Directory.GetFiles(Directory.GetCurrentDirectory() + "/adventures");
-            
-            foreach (string dir in dirs)
+            foreach (Adventure adventure in AdventureService.adventures.Values.ToList())
             {
-                dynamic config = (JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(dir))).config;
-
-                var builder = new EmbedBuilder()
-                    .WithTitle(config.name.ToString())
-                    .WithDescription(config.description.ToString())
-                    .WithColor(new Color(0xCB755A))
-
-                    .WithThumbnailUrl(config.imageurl.ToString())
-                    .AddField("plays", config.plays.ToString(), true)
-                    .AddField("creator", config.creator.ToString(), true);
-                var embed = builder.Build();
-
+                Embed embed = AdventureService.GetAdventureEmbed(adventure);
                 await ReplyAsync(null, embed: embed);
             }
-
-            
         }
 
         [Command("startadventure")]
         [Alias("start", "play")]
         public async Task StartAsync([Remainder] string adventurename)
         {
-            JObject json = JObject.Parse(File.ReadAllText(Directory.GetCurrentDirectory() + "/adventures/" + adventurename + ".json"));
+            JObject json = JObject.Parse(System.IO.File.ReadAllText(System.IO.Directory.GetCurrentDirectory() + "/adventures/" + adventurename + ".json"));
             JToken segments = json["segments"];
 
             string segIndex = "0";
@@ -73,7 +57,7 @@ namespace Pathfinder.Modules
                 }
 
                 var embed = builder.Build();
-                await Task.Delay(2000);
+                await Task.Delay(5000);
                 var message = await ReplyAsync(null, embed: embed);
 
                 foreach (JObject choice in segments[segIndex]["choices"])

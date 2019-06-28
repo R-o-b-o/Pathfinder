@@ -15,6 +15,8 @@ namespace Pathfinder
 {
     class Program
     {
+        public DiscordSocketClient client;
+
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -22,17 +24,16 @@ namespace Pathfinder
         {
             DotNetEnv.Env.Load();
 
+            client = new DiscordSocketClient();
             var services = ConfigureServices();
-            var client = services.GetRequiredService<DiscordSocketClient>();
 
-            // Tokens should be considered secret data and never hard-coded.
-            // We can read from the environment variable to avoid hardcoding.
+            services.GetRequiredService<AdventureService>();
+            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("token"));
             await client.StartAsync();
 
             await client.SetGameAsync("p!help");
-            // Here we initialize the logic required to register our commands.
-            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
             Console.WriteLine("bot started");
             await Task.Delay(-1);
@@ -41,10 +42,11 @@ namespace Pathfinder
         private IServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton(client)
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<HttpClient>()
+                .AddSingleton<AdventureService>()
                 .BuildServiceProvider();
         }
     }
