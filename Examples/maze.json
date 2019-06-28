@@ -1,0 +1,128 @@
+{
+    "config" : {
+        "name" : "maze",
+        "description" : "simple maze with no traps",
+        "creator" : "Robo#4196",
+        "plays" : 0,
+        "imageurl" : "https://www.uncg.edu/cmp/faculty/srtate/100.f14/labs/Maze1.png"
+    },
+    "segments" : {
+        "0" : {
+            "maintext" : "You reach the front of the maze, it's made of stone and the walls are barely higher such that you cannot see over",
+            "choicetext" : "",
+            "choices" : [
+                {
+                    "emote" : "⏫",
+                    "text" : "enter maze",
+                    "target" : "1"
+                }
+            ]
+        },
+        "1" : {
+            "maintext" : "You have entered the maze and have reached a divluging path",
+            "choicetext" : "which path should you take?",
+            "choices" : [
+                {
+                    "text" : "left",
+                    "emote" : "⬅",
+                    "target" : "3"
+                },
+                {
+                    "text" : "right",
+                    "emote" : "➡",
+                    "target" : "deadend"
+                }
+            ]
+        },
+        "deadend" : {
+            "maintext" : "You continue through the maze, and have reached a dead end",
+            "choicetext" : "you run out of stamina and die",
+            "choices" : []
+        },
+        "3" : {
+            "maintext" : "You continue through the maze, and have reached another divluging path",
+            "choicetext" : "which path should you take?",
+            "choices" : [
+                {
+                    "text" : "left",
+                    "emote" : "⬅",
+                    "target" : "deadend"
+                },
+                {
+                    "text" : "right",
+                    "emote" : "➡",
+                    "target" : "4"
+                }
+            ]
+        },
+        "4" : {
+            "maintext" : "You continue through the maze, and have reached another divluging path",
+            "choicetext" : "which path should you take?",
+            "choices" : [
+                {
+                    "text" : "left",
+                    "emote" : "⬅",
+                    "target" : "5"
+                },
+                {
+                    "text" : "right",
+                    "emote" : "➡",
+                    "target" : "deadend"
+                }
+            ]
+        },
+        "5" : {
+            "maintext" : "You continue through the maze, and have reached another divluging path",
+            "choicetext" : "which path should you take?",
+            "choices" : [
+                {
+                    "text" : "left",
+                    "emote" : "⬅",
+                    "target" : "deadend"
+                },
+                {
+                    "text" : "right",
+                    "emote" : "➡",
+                    "target" : "6"
+                }
+            ]
+        },
+        "6" : {
+            "maintext" : "You continue through the maze, and reach a new looking section",
+            "choicetext" : "which path should you take?",
+            "choices" : [
+                {
+                    "text" : "straight",
+                    "emote" : "⬆",
+                    "target" : "madeitout"
+                },
+                {
+                    "text" : "right",
+                    "emote" : "➡",
+                    "target" : "7"
+                }
+            ]
+        },
+        "madeitout" : {
+            "maintext" : "You continue through the maze, and reach THE END!",
+            "choicetext" : "You Win",
+            "choices" : []
+        },
+        "7" : {
+            "maintext" : "You continue through the maze, and reach a new looking section",
+            "choicetext" : "which path should you take?",
+            "choices" : [
+                {
+                    "text" : "left",
+                    "emote" : "⬅",
+                    "target" : "madeitout"
+                },
+                {
+                    "text" : "right",
+                    "emote" : "➡",
+                    "target" : "deadend"
+                }
+            ]
+        }
+    }
+}

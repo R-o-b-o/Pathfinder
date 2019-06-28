@@ -18,7 +18,7 @@ namespace Pathfinder
     {
         public string maintext { get; set; }
         public string choicetext { get; set; }
-        public AdventureChoice choice { get; set; }
+        public List<AdventureChoice> choices { get; set; }
     }
     public class AdventureChoice
     {

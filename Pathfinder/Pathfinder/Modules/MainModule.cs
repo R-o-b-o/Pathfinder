@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Pathfinder.Services;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Pathfinder.Modules
 {
@@ -37,45 +35,18 @@ namespace Pathfinder.Modules
         [Alias("start", "play")]
         public async Task StartAsync([Remainder] string adventurename)
         {
-            JObject json = JObject.Parse(System.IO.File.ReadAllText(System.IO.Directory.GetCurrentDirectory() + "/adventures/" + adventurename + ".json"));
-            JToken segments = json["segments"];
-
-            string segIndex = "0";
-            while (true)
+            if (!AdventureService.messageMarkers.ContainsKey(Context.Channel.Id))
             {
-                await ReplyAsync((string)segments[segIndex]["maintext"]);
+                Dictionary<string, AdventureSegment> segments = AdventureService.adventures[adventurename].segments;
+                string segIndex = "0";
+                IUserMessage msg = await AdventureService.SendSegmentMessage(Context.Channel, adventurename, segIndex);
 
-
-                var builder = new EmbedBuilder()
-                        .WithTitle("choice")
-                        .WithDescription(string.Format("```{0}```", (string)segments[segIndex]["choicetext"]))
-                        .WithColor(new Color(0xCB755A));
-
-                foreach (JObject choice in segments[segIndex]["choices"])
-                {
-                    builder.AddField((string)choice["text"], (string)choice["emote"], true);
-                }
-
-                var embed = builder.Build();
-                await Task.Delay(5000);
-                var message = await ReplyAsync(null, embed: embed);
-
-                foreach (JObject choice in segments[segIndex]["choices"])
-                {
-                    Emoji emoji = new Emoji((string)choice["emote"]);
-                    await message.AddReactionAsync(emoji);
-                }
-
-                await Task.Delay(5000);
-
-                foreach (JObject choice in segments[segIndex]["choices"])
-                {
-                    Emoji emoji = new Emoji((string)choice["emote"]);
-                    if ((await message.GetReactionUsersAsync(emoji, 5).FlattenAsync()).Count() > 1)
-                    {
-                        segIndex = (string)choice["target"];
-                    }
-                }
+                messageMarker messageMarker = new messageMarker(msg.Id, adventurename, segIndex);
+                AdventureService.messageMarkers.Add(msg.Channel.Id, messageMarker);
+            }
+            else
+            {
+                await ReplyAsync("Sorry but only one adventure is allowed in a channel at once");
             }
         }
     }
