@@ -74,19 +74,66 @@ namespace Pathfinder.Services
 
         public static async Task<IUserMessage> SendSegmentMessage(ISocketMessageChannel channel, string adventurename, string segIndex)
         {
-            Dictionary<string, AdventureSegment> segments = AdventureService.adventures[adventurename].segments;
-            await channel.SendMessageAsync(segments[segIndex].maintext);
-            Embed embed = AdventureService.GetChoiceEmbed(adventurename, segIndex);
-            await Task.Delay(1000);
+            AdventureSegment segment = adventures[adventurename].segments[segIndex];
+            await channel.SendMessageAsync(string.Format("**{0}**", segment.maintext));
+
+            Embed embed = GetChoiceEmbed(adventurename, segIndex);
+            await Task.Delay(5000);
             IUserMessage msg = await channel.SendMessageAsync(null, embed: embed);
 
             messageMarker messageMarker = new messageMarker(msg.Id, adventurename, segIndex);
 
-            foreach (Emoji emote in AdventureService.GetChoiceEmotes(adventurename, segIndex))
+            foreach (Emoji emote in GetChoiceEmotes(adventurename, segIndex))
             {
                 await msg.AddReactionAsync(emote);
             }
             return msg;
+        }
+
+        public static async Task SendEndingMessage(ISocketMessageChannel channel, string adventurename, string segIndex)
+        {
+            Adventure adventure = adventures[adventurename];
+            AdventureSegment segment = adventure.segments[segIndex];
+            await channel.SendMessageAsync(string.Format("**{0}**", segment.maintext));
+
+            string place;
+            switch (adventure.config.plays)
+            {
+                case 1:
+                    place = "1st";
+                    break;
+                case 2:
+                    place = "2nd";
+                    break;
+                case 3:
+                    place = "3rd";
+                    break;
+                default:
+                    place = adventure.config.plays.ToString() + "th";
+                    break;
+            }
+
+            EmbedBuilder builder = new EmbedBuilder()
+                        .WithTitle("Ending")
+                        .WithDescription(string.Format("```{0}```", segment.choicetext))
+                        .WithColor(new Color(0xf26500))
+                        .WithFooter(footer => footer.WithText(string.Format("You are the {0} player", place)));
+
+            
+            Embed embed = builder.Build();
+            await Task.Delay(1000);
+            await channel.SendMessageAsync(null, embed: embed);
+        }
+
+        private void IncrementPlays(string adventurename)
+        {
+            string dir = Directory.GetCurrentDirectory() + "\\adventures\\" + adventurename + ".json";
+            Adventure adventure = adventures[adventurename];
+
+            adventure.config.plays++;
+            adventures[adventurename] = adventure;
+            string output = JsonConvert.SerializeObject(adventure, Formatting.Indented);
+            File.WriteAllText(dir, output);
         }
 
         private async Task OnReactionAdded(Discord.Cacheable<Discord.IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
@@ -96,9 +143,10 @@ namespace Pathfinder.Services
             if (reaction.User.Value.IsBot || message.Id != messageMarker.messageId)
                 return;
 
-            Dictionary<string, AdventureSegment> segments = adventures[messageMarker.adventureName].segments;
+            Adventure adventure = adventures[messageMarker.adventureName];
+            AdventureSegment segment = adventure.segments[messageMarker.segIndex];
 
-            foreach (AdventureChoice choice in segments[messageMarker.segIndex].choices)
+            foreach (AdventureChoice choice in segment.choices)
             {
                 Emoji emoji = new Emoji(choice.emote);
                 IUserMessage msg = await message.GetOrDownloadAsync();
@@ -108,8 +156,17 @@ namespace Pathfinder.Services
                 }
             }
 
-            IUserMessage newmsg = await SendSegmentMessage(channel, messageMarker.adventureName, segIndex);
-            messageMarkers[channel.Id] = new messageMarker(newmsg.Id, messageMarker.adventureName, segIndex);
+            if (adventure.segments[segIndex].choices.Count() > 0)
+            {
+                IUserMessage newmsg = await SendSegmentMessage(channel, messageMarker.adventureName, segIndex);
+                messageMarkers[channel.Id] = new messageMarker(newmsg.Id, messageMarker.adventureName, segIndex);
+            }
+            else
+            {
+                IncrementPlays(messageMarker.adventureName);
+                await SendEndingMessage(channel, messageMarker.adventureName, segIndex);
+                messageMarkers.Remove(channel.Id);
+            }
         }
     }
 }
