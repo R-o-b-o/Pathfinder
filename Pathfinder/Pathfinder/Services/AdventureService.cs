@@ -78,7 +78,7 @@ namespace Pathfinder.Services
             await channel.SendMessageAsync(string.Format("**{0}**", segment.maintext));
 
             Embed embed = GetChoiceEmbed(adventurename, segIndex);
-            await Task.Delay(5000);
+            await Task.Delay(Convert.ToInt32(segment.maintext.Length / 20 * 1000));
             IUserMessage msg = await channel.SendMessageAsync(null, embed: embed);
 
             messageMarker messageMarker = new messageMarker(msg.Id, adventurename, segIndex);
@@ -121,7 +121,7 @@ namespace Pathfinder.Services
 
             
             Embed embed = builder.Build();
-            await Task.Delay(1000);
+            await Task.Delay(Convert.ToInt32(segment.maintext.Length / 20 * 1000));
             await channel.SendMessageAsync(null, embed: embed);
         }
 
