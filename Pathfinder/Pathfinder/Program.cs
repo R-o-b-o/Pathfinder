@@ -15,6 +15,7 @@ namespace Pathfinder
 {
     class Program
     {
+        public static string prefix = "p!";
         public DiscordSocketClient client;
 
         static void Main(string[] args)

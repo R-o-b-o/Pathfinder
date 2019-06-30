@@ -9,19 +9,9 @@ using Pathfinder.Services;
 
 namespace Pathfinder.Modules
 {
-    public class MainModule : ModuleBase<SocketCommandContext>
+    public class AdventureModule : ModuleBase<SocketCommandContext>
     {
-        [Command("ping")]
-        [Alias("pong")]
-        public async Task PingAsync()
-        {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            var message = await ReplyAsync(".");
-            watch.Stop();
-            await message.ModifyAsync(msg => msg.Content = string.Format("that took **{0}ms**", watch.ElapsedMilliseconds));
-        }
-
-        [Command("adventures")]
+        [Command("adventures"), Summary("Lists all current adventures.")]
         public async Task AdventuresAsync()
         {
             foreach (Adventure adventure in AdventureService.adventures.Values.ToList())
@@ -31,7 +21,7 @@ namespace Pathfinder.Modules
             }
         }
 
-        [Command("startadventure")]
+        [Command("startadventure"), Summary("Start an adventure with the desired name.")]
         [Alias("start", "play")]
         public async Task StartAsync([Remainder] string adventurename)
         {
