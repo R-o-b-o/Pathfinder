@@ -16,6 +16,8 @@ namespace Pathfinder.Services
         public static Dictionary<string, Adventure> adventures = new Dictionary<string, Adventure>();
         public static Dictionary<ulong, messageMarker> messageMarkers = new Dictionary<ulong, messageMarker>();
 
+        private const int charPerSec = 50;
+
         public AdventureService(DiscordSocketClient client)
         {
             client.ReactionAdded += OnReactionAdded;
@@ -38,6 +40,9 @@ namespace Pathfinder.Services
         {
             AdventureConfig config = adventure.config;
 
+            config.creator = config.creator == "" ? "unknown" : config.creator;
+            config.description = config.creator == "" ? "this is an adventure" : config.description;
+
             EmbedBuilder builder = new EmbedBuilder()
                 .WithTitle(config.name)
                 .WithDescription(config.description)
@@ -55,8 +60,9 @@ namespace Pathfinder.Services
             AdventureSegment segment = adventures[adventurename].segments[segmentname];
             var builder = new EmbedBuilder()
                         .WithTitle("choice")
-                        .WithDescription(string.Format("```{0}```", segment.choicetext))
+                        .WithDescription(string.Format("``` {0} ```", segment.choicetext))
                         .WithColor(new Color(0xCB755A));
+            // if blank default e.g "what do you do?"
 
             foreach (AdventureChoice choice in segment.choices)
             {
@@ -78,7 +84,7 @@ namespace Pathfinder.Services
             await channel.SendMessageAsync(string.Format("**{0}**", segment.maintext));
 
             Embed embed = GetChoiceEmbed(adventurename, segIndex);
-            await Task.Delay(Convert.ToInt32(segment.maintext.Length / 20 * 1000));
+            await Task.Delay(Convert.ToInt32(segment.maintext.Length / charPerSec * 1000));
             IUserMessage msg = await channel.SendMessageAsync(null, embed: embed);
 
             messageMarker messageMarker = new messageMarker(msg.Id, adventurename, segIndex);
@@ -96,32 +102,42 @@ namespace Pathfinder.Services
             AdventureSegment segment = adventure.segments[segIndex];
             await channel.SendMessageAsync(string.Format("**{0}**", segment.maintext));
 
-            string place;
-            switch (adventure.config.plays)
+            string ord;
+            if (new int[] { 11, 12, 13 }.Contains(adventure.config.plays))
             {
-                case 1:
-                    place = "1st";
-                    break;
-                case 2:
-                    place = "2nd";
-                    break;
-                case 3:
-                    place = "3rd";
-                    break;
-                default:
-                    place = adventure.config.plays.ToString() + "th";
-                    break;
+                ord = "th";
             }
+            else
+            {
+                switch (adventure.config.plays.ToString().Last())
+                {
+                    case '1':
+                        ord = "st";
+                        break;
+                    case '2':
+                        ord = "nd";
+                        break;
+                    case '3':
+                        ord = "rd";
+                        break;
+                    default:
+                        ord = "th";
+                        break;
+                }
+            }
+            
+
+            string place = adventure.config.plays.ToString() + ord;
 
             EmbedBuilder builder = new EmbedBuilder()
                         .WithTitle("Ending")
-                        .WithDescription(string.Format("```{0}```", segment.choicetext))
+                        .WithDescription(string.Format("``` {0} ```", segment.choicetext))
                         .WithColor(new Color(0xf26500))
                         .WithFooter(footer => footer.WithText(string.Format("You are the {0} player", place)));
 
             
             Embed embed = builder.Build();
-            await Task.Delay(Convert.ToInt32(segment.maintext.Length / 20 * 1000));
+            await Task.Delay(Convert.ToInt32(segment.maintext.Length / charPerSec * 1000));
             await channel.SendMessageAsync(null, embed: embed);
         }
 

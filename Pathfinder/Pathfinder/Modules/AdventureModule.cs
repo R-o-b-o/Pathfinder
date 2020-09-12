@@ -28,7 +28,7 @@ namespace Pathfinder.Modules
             if (!AdventureService.messageMarkers.ContainsKey(Context.Channel.Id))
             {
                 Dictionary<string, AdventureSegment> segments = AdventureService.adventures[adventurename].segments;
-                string segIndex = "0";
+                string segIndex = "Start";
                 IUserMessage msg = await AdventureService.SendSegmentMessage(Context.Channel, adventurename, segIndex);
 
                 messageMarker messageMarker = new messageMarker(msg.Id, adventurename, segIndex);
